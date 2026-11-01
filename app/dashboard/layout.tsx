@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "./_component/Header";
 
-function DashboardLayout({ children }) {
+function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <Header />

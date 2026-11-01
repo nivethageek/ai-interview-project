@@ -10,75 +10,39 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ai } from "@/utils/GeminiAI";
-
-interface InterviewQuestion {
-  question: string;
-  answer: string;
-}
+import { useRouter } from "next/navigation";
+import { createInterview, type InterviewQuestion } from "../actions";
 
 function AddNewInterview() {
   const [openDiaglog, setOpenDialog] = useState(false);
   const [role, setRole] = useState("");
   const [techStack, setTechStack] = useState("");
   const [experience, setExperience] = useState("");
-
-  // Track loading and parsed response array
   const [loading, setLoading] = useState(false);
   const [interviewQuestions, setInterviewQuestions] = useState<
     InterviewQuestion[]
   >([]);
+  const [submitError, setSubmitError] = useState("");
+  const router = useRouter();
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
-
-    const questionCount = process.env.NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT;
-
-    const inputPrompt =
-      "Job position: " +
-      role +
-      ", Job description: " +
-      techStack +
-      ", Years of experience: " +
-      experience +
-      ". Based on the job position, description, and experience, generate " +
-      questionCount +
-      " important interview questions along with their answers.";
+    setSubmitError("");
     try {
-      const interaction = await ai.interactions.create({
-        model: "gemini-3.8-flash",
-        input: inputPrompt,
-        // CORRECT INTERACTIONS API STRUCTURE
-        response_format: {
-          text: {
-            mime_type: "application/json",
-            schema: {
-              type: "array", // Must be lowercase string
-              items: {
-                type: "object", // Must be lowercase string
-                properties: {
-                  question: { type: "string" },
-                  answer: { type: "string" },
-                },
-                required: ["question", "answer"],
-              },
-            },
-          },
-          type: "array",
-        },
+      const result = await createInterview({
+        role,
+        techStack,
+        experience,
       });
-
-      const rawJson = interaction.output_text;
-      if (rawJson) {
-        const parsedResponse: InterviewQuestion[] = JSON.parse(rawJson);
-
-        setInterviewQuestions(parsedResponse);
-
-        setOpenDialog(false);
-      }
+      setInterviewQuestions(result.questions);
+      setOpenDialog(false);
+      router.push(`/dashboard/interview/${result.mockId}`);
     } catch (error) {
-      console.error("Error getting or parsing API response:", error);
+      console.error("Error creating mock interview:", error);
+      setSubmitError(
+        error instanceof Error ? error.message : "Unable to create interview.",
+      );
     } finally {
       setLoading(false);
     }
@@ -135,6 +99,11 @@ function AddNewInterview() {
                   onChange={(event) => setExperience(event.target.value)}
                 />
               </div>
+              {submitError && (
+                <p role="alert" className="px-2 text-sm text-destructive">
+                  {submitError}
+                </p>
+              )}
               <div className="flex p-6 gap-5 justify-end">
                 <Button
                   type="button"
