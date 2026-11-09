@@ -1,4 +1,5 @@
 "use client";
+import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -33,6 +34,7 @@ function Header() {
           How it works?
         </li>
       </ul>
+      <UserButton />
     </div>
   );
 }

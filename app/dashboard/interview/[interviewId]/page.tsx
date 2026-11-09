@@ -3,11 +3,9 @@ import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/utils/db";
 import { MockInterview } from "@/utils/schema";
-
-interface InterviewQuestion {
-  question: string;
-  answer: string;
-}
+import InterviewPractice, {
+  type InterviewQuestion,
+} from "./_component/InterviewPractice";
 
 export default async function Interview({
   params,
@@ -43,30 +41,5 @@ export default async function Interview({
     notFound();
   }
 
-  return (
-    <main className="mx-auto w-full max-w-3xl space-y-6 p-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold">
-          {interview.jobPosition} Interview
-        </h1>
-        <p className="text-muted-foreground">
-          {interview.jobDescription} · {interview.jobExperience} years of
-          experience
-        </p>
-      </header>
-      <section className="space-y-4" aria-label="Interview questions">
-        {questions.map((item, index) => (
-          <article
-            key={`${index}-${item.question}`}
-            className="space-y-2 rounded-lg border p-4"
-          >
-            <h2 className="font-semibold">
-              Q{index + 1}: {item.question}
-            </h2>
-            <p className="text-sm text-muted-foreground">{item.answer}</p>
-          </article>
-        ))}
-      </section>
-    </main>
-  );
+  return <InterviewPractice interview={interview} questions={questions} />;
 }

@@ -1,4 +1,3 @@
-import React from "react";
 import AddNewInterview from "./_component/AddNewInterview";
 
 function Dashboard() {
